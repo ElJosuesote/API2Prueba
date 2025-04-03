@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRUD Celulares</title>
+</head>
+<body>
+  <h1>Lista de Celulares</h1>
+  <ul id="celulares-list"></ul>
+
+  <h2>Agregar Celular</h2>
+  <form id="add-celular-form">
+    <input type="text" id="modelo" placeholder="Modelo" required>
+    <input type="text" id="marca" placeholder="Marca" required>
+    <input type="number" id="precio" placeholder="0" required>
+    <button type="submit">Agregar</button>
+  </form>
+
+  <script>
+    const apiUrl = 'http://localhost:3000/api/celulares';
+
+    async function cargarCelulares() {
+      const response = await fetch(apiUrl);
+      const celulares = await response.json();
+      const lista = document.getElementById('celulares-list');
+      lista.innerHTML = '';
+      celulares.forEach((celular) => {
+        const item = document.createElement('li');
+        item.textContent = `${celular.modelo} ${celular.marca} ${celular.precio}`;
+        const botonEliminar = document.createElement('button');
+        botonEliminar.textContent = 'Eliminar';
+        botonEliminar.onclick = () => eliminarCelular(celular.id);
+        item.appendChild(botonEliminar);
+        lista.appendChild(item);
+      });
+    }
+
+    document.getElementById('add-celular-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const modelo = document.getElementById('modelo').value;
+      const marca = document.getElementById('marca').value;
+      const precio = document.getElementById('precio').value;
+
+      await fetch(apiUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ modelo, marca, precio }),
+      });
+
+      document.getElementById('add-celular-form').reset();
+      cargarCelulares();
+    });
+
+    async function eliminarCelular(id) {
+      await fetch(`${apiUrl}/${id}`, { method: 'DELETE' });
+      cargarCelulares();
+    }
+
+    cargarCelulares();
+  </script>
+</body>
+</html>
